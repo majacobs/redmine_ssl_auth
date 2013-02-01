@@ -1,9 +1,13 @@
 class AccountController < ApplicationController
   def try_ssl_auth
-    session[:email] = request.env["SSL_CLIENT_S_DN_CN"]
-    if session[:email].nil? and request.env['HTTP_SSL_CLIENT_S_DN']
-      tmp = request.env['HTTP_SSL_CLIENT_S_DN'].scan(/emailAddress=([\w\d\-\.]+@[\w\d\-\.]+\.[\w\d]+)\//).flatten
-      session[:email] = tmp.first
+    if request.env["SSL_CLIENT_CERT"]
+      raw_client_cert = request.env["SSL_CLIENT_CERT"]
+      cert = OpenSSL::X509::Certificate.new(raw_client_cert)
+      subject_alt_name = cert.extensions.find {|e| e.oid == "subjectAltName"}
+      if !subject_alt_name.nil?
+        tmp = subject_alt_name.value.scan(/email:([^,]+),/).flatten
+        session[:email] = tmp.first.downcase
+      end
     end
     if session[:email]
       logger.info ">>> Login with certificate email: " + session[:email]

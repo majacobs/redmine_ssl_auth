@@ -12,7 +12,7 @@ It's very simple
 
 == Notes 
 
-* This plugin expects the CN of the certificate to be an email address
+* This plugin expects the Subject Alternative Name to be contain an email address (<tt>email:a@b.c,</tt>)
 * A user with that email address should exist in the database
 * This doesn't check any password, so implement certificate verification in Apache
 * You can visit /login?skip_ssl=1 to skip SSL authentication and do regular login
@@ -42,6 +42,7 @@ In my case, I find this to be the configuration I wanted
         
         <Location /login/ssl>
           SSLVerifyClient require
+          SSLOptions +ExportCertData
         </Location>
 
         <Location />
@@ -55,8 +56,3 @@ By making <tt>SSLVerifyClient optional</tt> and commenting <tt>Require valid-use
 
 If you want to force your users to use certificates, change SSLVerifyClient to require and uncomment <tt>Require valid-user</tt>
 
-== Questions
-
-To jbernal@ebox-platform.com
-
-Please, don't ask about apache configuration. I don't know much more than it's already here. Email about the plugin (bugs, patches, suggestions, ...) is welcome :)
